@@ -47,6 +47,7 @@ public class NetflixController {
                                                 @RequestParam(value="cast",required = false) String[] cast, @RequestParam(value="country",required = false) String[] country,
                                                 @RequestParam(value="release_year",required = false) Long release_year, @RequestParam(value="rating",required = false) String rating,
                                                 @RequestParam(value="duration",required = false) Integer duration, @RequestParam(value="listed_in",required = false) String[] listed_in) {
+
         return netflixService.generalSearchByFilters(id, type,  title, director, cast,
                 country, release_year, rating, duration, listed_in);
     }

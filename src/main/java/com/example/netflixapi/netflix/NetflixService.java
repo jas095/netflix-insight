@@ -8,20 +8,19 @@ import org.springframework.stereotype.Component;
 
 import java.io.*;
 import java.util.ArrayList;
-import java.util.stream.Stream;
+import java.util.Arrays;
 
 @Component
 public class NetflixService implements NetflixRepository {
     private final ArrayList<Netflix> nett;
-    //private final ArrayList<Netflix> apiNetflix;
 
     public NetflixService() {
         nett = new ArrayList();
-        //apiNetflix = new ArrayList();
     }
 
     private void ingest_transforms_store_data(){
-        String dataSource = System.getProperty("user.dir")+"/netflix_db.csv";
+        //String dataSource = System.getProperty("user.dir")+"/netflix_db.csv";
+        String dataSource = "src/main/resources/netflix_db.csv";
         Reader in; String line="";
         String[] listed_in,director, cast, country;
         Integer duration;
@@ -34,6 +33,13 @@ public class NetflixService implements NetflixRepository {
                 cast = record.get(3).split(",");
                 country = record.get(4).split(",");
                 listed_in = record.get(8).split(",");
+
+                for (int i=0; i < director.length; i++) director[i] = director[i].trim();
+                for (int i=0; i < cast.length; i++) cast[i] = cast[i].trim();
+                for (int i=0; i < country.length; i++) country[i] = country[i].trim();
+                for (int i = 0; i < listed_in.length; i++) listed_in[i] = listed_in[i].trim();
+
+
                 duration = Integer.valueOf(record.get(7).replaceAll("[^0-9]",""));
                 Netflix netflix = new Netflix(record.get(0), record.get(1), director, cast, country, Long.parseLong(record.get(5)), record.get(6), duration, listed_in);
                 nett.add(netflix);
@@ -54,7 +60,8 @@ public class NetflixService implements NetflixRepository {
         ObjectMapper mapper = new ObjectMapper();
         try {
             //for window c://temp/employee.json
-            mapper.writeValue(new File(System.getProperty("user.dir")+"/netflix_db.json"), nett);
+            //mapper.writeValue(new File(System.getProperty("user.dir")+"/netflix_db.json"), nett);
+            mapper.writeValue(new File("src/main/resources/netflix_db.json"), nett);
 
         } catch (IOException e) {
             e.printStackTrace();
@@ -70,7 +77,8 @@ public class NetflixService implements NetflixRepository {
     @Override
     public Netflix findById(Long id){
         Netflix netflixListID = null;
-        File jsonSource = new File(System.getProperty("user.dir")+"/netflix_db.json");
+        //File jsonSource = new File(System.getProperty("user.dir")+"/netflix_db.json");
+        File jsonSource = new File("src/main/resources/netflix_db.json");
 
         ObjectMapper mapper = new ObjectMapper();
         try {
@@ -127,17 +135,18 @@ public class NetflixService implements NetflixRepository {
         String conditionST;
         ArrayList<Netflix> netflixListObj;
         ArrayList<Netflix> netflixListAPI = new ArrayList<>();
-        File jsonSource = new File(System.getProperty("user.dir")+"/netflix_db.json");
+        //File jsonSource = new File(System.getProperty("user.dir")+"/netflix_db.json");
+        File jsonSource = new File("src/main/resources/netflix_db.json");
         ObjectMapper mapper = new ObjectMapper();
         try {
             netflixListObj = mapper.readValue(jsonSource, new TypeReference<ArrayList<Netflix>>(){});
 
             for (Netflix netflix : netflixListObj) {
-                    if (true == netflix.getId().equals(id) || true == netflix.getType().equals(type) || true == netflix.getTitle().equals(title) ||
-                            true == netflix.getDirector().equals(director) || true == netflix.getCast().equals(cast) ||
-                            true == netflix.getCountry().equals(country) || true == netflix.getRelease_year().equals(release_year) ||
-                            true == netflix.getRating().equals(rating) || true == netflix.getDuration().equals(duration) ||
-                            true == netflix.getListed_in().equals(listed_in)) {
+                if (netflix.getId().equals(id) || netflix.getType().equals(type) || netflix.getTitle().equals(title) ||
+                            Arrays.equals(director,netflix.getDirector()) || Arrays.equals(netflix.getCast(),cast) ||
+                            Arrays.equals(country, netflix.getCountry()) || netflix.getRelease_year().equals(release_year) ||
+                            netflix.getRating().equals(rating) || netflix.getDuration().equals(duration) ||
+                            Arrays.equals(listed_in,netflix.getListed_in())) {
                         netflixListAPI.add(netflix);
                     }
             }
